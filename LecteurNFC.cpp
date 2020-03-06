@@ -60,11 +60,14 @@ int main()
       .nbr = NBR_106,
     };  // Poll for a ISO14443A (MIFARE) tag
 
+    string  UID;
     while (true)
     {
-        string  UID;
         if (nfc_initiator_select_passive_target(pnd, nmMifare, NULL, 0, &nt) > 0) {
-            UID = print_hex(nt.nti.nai.abtUid, nt.nti.nai.szUidLen);
+            if (UID != print_hex(nt.nti.nai.abtUid, nt.nti.nai.szUidLen)) {
+                UID = print_hex(nt.nti.nai.abtUid, nt.nti.nai.szUidLen);
+                cout << "Badge lu: " << UID << endl;
+            }
         }
     }
 

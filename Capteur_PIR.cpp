@@ -23,13 +23,13 @@ int main(void)
 	printf("\n");
 
 	while (true) {
-		if (!(digitalRead(PIRPin))) {
+		if (digitalRead(PIRPin)) {
+			printf("Presence detectée! \n");
 			delay(500);
 		}
 		else {
 			delay(1000);
-			printf("Presence detectée! \n");
-
+			printf("Presence non detectée! \n");
 		}
 	}
 #endif // test_PIR
