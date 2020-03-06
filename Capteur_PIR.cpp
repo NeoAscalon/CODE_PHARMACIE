@@ -8,12 +8,11 @@
 
 int main(void)
 {
-	
 	if (wiringPiSetup() == -1) {
 		printf("Setup wiringPi failed !");
 		exit(1);
 	}
-	
+
 	pinMode(PIRPin, INPUT);
 
 #ifdef test_PIR
@@ -36,6 +35,3 @@ int main(void)
 
 	return 0;
 }
-
-
-
