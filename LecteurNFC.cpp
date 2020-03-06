@@ -7,18 +7,20 @@ using namespace std;
 
 static string print_hex(const uint8_t* pbtData, const size_t szBytes)
 {
-    int j = 0;
-    char test[2];
-    char chaine[8];
+    short int j = 0;
+    char buffer[1];
+    char chaine[7];
     for (size_t i = 0; i < szBytes; i++)
     {
-        sprintf(test, "%02x  ", pbtData[i]);
-        chaine[0 + j] = test[0];
-        chaine[1 + j] = test[1];
+        sprintf(buffer, "%02x", pbtData[i]);
+        chaine[0 + j] = buffer[0];
+        chaine[1 + j] = buffer[1];
         j = j + 2;
     }
+    buffer[0] = 0;
+    buffer[1] = 0;
     return chaine;
-}
+} //returns NFC tag UID
 
 
 int main()
@@ -60,10 +62,9 @@ int main()
 
     while (true)
     {
-        string  chaine;
+        string  UID;
         if (nfc_initiator_select_passive_target(pnd, nmMifare, NULL, 0, &nt) > 0) {
-            chaine = print_hex(nt.nti.nai.abtUid, nt.nti.nai.szUidLen);
-            cout << "J'ai lu: " << chaine << endl;
+            UID = print_hex(nt.nti.nai.abtUid, nt.nti.nai.szUidLen);
         }
     }
 
