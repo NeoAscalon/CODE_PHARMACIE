@@ -78,6 +78,7 @@
     <ClCompile Include="Capteur_PIR.cpp" />
     <ClCompile Include="LecteurNFC.cpp" />
     <ClCompile Include="PHOTO.cpp" />
+    <ClCompile Include="Switch_Porte.cpp" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

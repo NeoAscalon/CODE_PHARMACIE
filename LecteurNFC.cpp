@@ -18,7 +18,7 @@ static string print_hex(const uint8_t* pbtData, const size_t szBytes)
 		j = j + 2;
 	}
 	buffer[0] = 0;
-	buffer[1] = 0;
+	buffer[1] = 0;  //Nettoie le buffer
 	return chaine;
 } //returns NFC tag UID
 
