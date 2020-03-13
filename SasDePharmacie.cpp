@@ -130,8 +130,30 @@ string SasDePharmacie::print_hex(const uint8_t* pbtData, const size_t szBytes)
 	return chaine;
 } //returns NFC tag UID
 
+bool SasDePharmacie::VerifierPresence(bool val)
+{
+	if (val==presence)
+	{
+		presence = !presence;
+	}
+
+}
+
+bool SasDePharmacie::VerifierAutorisation()
+{
+	return false;
+}
+
 void main() {
 
-	SasDePharmacie a();
-
+	SasDePharmacie a;
+	while (true)
+	{
+		a.LectureBadge();
+		a.VerifierPresence();
+		a.VerifierAutorisation();
+		a.PrisePhoto();
+		a.CapteurPIR();
+		a.SwitchPorte();
+	}
 }

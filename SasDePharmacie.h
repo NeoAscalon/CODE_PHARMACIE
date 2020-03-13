@@ -28,6 +28,8 @@ public:
 	void SwitchPorte();
 	void CapteurPIR();
 	static string print_hex(const uint8_t*, const size_t);
+	bool VerifierPresence(bool);
+	bool VerifierAutorisation();
 private:
 	string  UID;
 	nfc_device* pnd;
@@ -40,7 +42,6 @@ private:
 	time_t temps;  		// pour la lecture du temps
 	struct tm datetime; // pour la mise en forme du temps
 	char format[32];
-	
-
+	bool presence = false;
 };
 
