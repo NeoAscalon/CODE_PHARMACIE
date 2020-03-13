@@ -4,7 +4,7 @@
 
 #define test_PIR
 
-#define PIRPin 0
+#define PIRPin 7
 
 int main(void)
 {

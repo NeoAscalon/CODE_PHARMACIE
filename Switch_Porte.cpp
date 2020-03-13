@@ -5,8 +5,8 @@
 
 #define Test_Porte
 
-#define PinPorte1 2
-#define PinPorte2 3
+#define PinPorte1 15
+#define PinPorte2 16
 
 int main(void)
 {
@@ -21,12 +21,12 @@ int main(void)
 #ifdef Test_Porte
 	while (true)
 	{
-		analogWrite(PinPorte1, HIGH);
-		analogWrite(PinPorte2, HIGH);
-		delay(2000);
-		analogWrite(PinPorte1, LOW);
-		analogWrite(PinPorte2, LOW);
-		delay(2000);
+		digitalWrite(PinPorte1, HIGH);  // Activé
+		digitalWrite(PinPorte2, HIGH);
+		delay(1000); // ms
+		digitalWrite(PinPorte2, LOW);
+		digitalWrite(PinPorte1, LOW);	  // Désactivé
+		delay(1000);
 	}
 	
 #endif // Test_Porte

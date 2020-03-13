@@ -9,7 +9,7 @@ int main() {
 
 	// declaration des commandes utilisées
 	char cmdCam[] = "sudo raspistill -vf -o ";
-	char badge[] = "FFCCDD11";
+	char badge[] = "DF8A90B9";
 
 	char cmd[256];  	// pour la ligne de commande permettant le lancement de la prise photo
 	time_t temps;  		// pour la lecture du temps
