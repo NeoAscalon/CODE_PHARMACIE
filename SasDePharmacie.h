@@ -18,6 +18,7 @@
 
 using namespace std;
 
+
 class SasDePharmacie
 {
 public:
@@ -25,18 +26,17 @@ public:
 	~SasDePharmacie();
 	void PrisePhoto();
 	void LectureBadge();
-	void SwitchPorte();
+	void SwitchPorte(bool);
 	void CapteurPIR();
 	static string print_hex(const uint8_t*, const size_t);
-	bool VerifierPresence(bool);
+	bool VerifierPresence();
 	bool VerifierAutorisation();
 private:
-	string  UID;
 	nfc_device* pnd;
 	nfc_target nt;
 	nfc_context* context;   // Allocate only a pointer to nfc_context
-	nfc_modulation nmMifare;
-	string  UID; //badge
+	nfc_modulation nmMifare;  //norme de lecture de badge
+	string  UID; // ID badge
 	char cmdCam[];
 	char cmd[256];  	// pour la ligne de commande permettant le lancement de la prise photo
 	time_t temps;  		// pour la lecture du temps
