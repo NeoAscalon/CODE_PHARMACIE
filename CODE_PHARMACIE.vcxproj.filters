@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="SasDePharmacie.cpp" />
+    <ClCompile Include="LecteurNFC.cpp">
+      <Filter>Prototypage</Filter>
+    </ClCompile>
+    <ClCompile Include="Capteur_PIR.cpp">
+      <Filter>Prototypage</Filter>
+    </ClCompile>
+    <ClCompile Include="PHOTO.cpp">
+      <Filter>Prototypage</Filter>
+    </ClCompile>
+    <ClCompile Include="Switch_Porte.cpp">
+      <Filter>Prototypage</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SasDePharmacie.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Prototypage">
+      <UniqueIdentifier>{40ed0f9a-04cc-43be-ace7-fc858599f2ad}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

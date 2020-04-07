@@ -1,4 +1,5 @@
 #pragma once
+
 #include <wiringPi.h>
 #include <string.h>
 #include <iostream>
@@ -7,17 +8,16 @@
 #include <time.h>
 #include <stdlib.h>
 
-//#define test_NFC  //fait
-//#define test_PIR   //fait
-//#define test_Porte  //fait
-//#define test_Photo //a faire
+
+#define Retour_Moniteur
+//#define tests			//Switch entre mode de test et mode normal
+
 
 #define PIRPin 7
 #define PinPorte1 15
 #define PinPorte2 16
 
 using namespace std;
-
 
 class SasDePharmacie
 {
@@ -26,9 +26,11 @@ public:
 	~SasDePharmacie();
 	void PrisePhoto();
 	void LectureBadge();
-	void SwitchPorte(bool);
-	void CapteurPIR();
+	void SetPresence(bool);
+	void clear();
+	string RetBadge();
 	static string print_hex(const uint8_t*, const size_t);
+	bool CapteurPIR();
 	bool VerifierPresence();
 	bool VerifierAutorisation();
 private:
@@ -37,11 +39,10 @@ private:
 	nfc_context* context;   // Allocate only a pointer to nfc_context
 	nfc_modulation nmMifare;  //norme de lecture de badge
 	string  UID; // ID badge
-	char cmdCam[];
+	string cmdCam;
 	char cmd[256];  	// pour la ligne de commande permettant le lancement de la prise photo
 	time_t temps;  		// pour la lecture du temps
 	struct tm datetime; // pour la mise en forme du temps
 	char format[32];
 	bool presence = false;
 };
-

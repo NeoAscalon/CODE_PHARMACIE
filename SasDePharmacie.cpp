@@ -3,57 +3,60 @@
 SasDePharmacie::SasDePharmacie()
 {
 	nfc_init(&context); // Initialize libnfc and set the nfc_context
-	
+
+	UID = "";
+
 	if (context == NULL) {
 		printf("Unable to init libnfc (malloc)\n");
 		exit(EXIT_FAILURE);
 	}   //quit if libnfc unable to initialize
-	
+
 	nmMifare = {
 	  .nmt = NMT_ISO14443A,
 	  .nbr = NBR_106,
 	}; // Poll for a ISO14443A (MIFARE) tag
-	
+
 	if (wiringPiSetup() == -1) {
 		printf("Setup wiringPi failed !");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	pinMode(PIRPin, INPUT);
 	pinMode(PinPorte1, OUTPUT);
 	pinMode(PinPorte2, OUTPUT);
 
-	cmdCam[] = "sudo raspistill -vf -o ";
-
-	time(&temps);
-
+	cmdCam = "sudo raspistill -vf -o /Evenements/";
 
 }
 
 SasDePharmacie::~SasDePharmacie()
 {
 	nfc_exit(context);// Release the context NFC Reader
-	exit(EXIT_SUCCESS);
 }
 
 void SasDePharmacie::PrisePhoto()
 {
+	// mise en forme de la commande systeme de capture de la photo
+	time(&temps);
 	datetime = *localtime(&temps);
 	strftime(format, 32, "-%H:%M_%d-%m-%Y", &datetime);
-	// mise en forme de la commande systeme de capture de la photo
-	strcpy(cmd, cmdCam);
+	strcpy(cmd, cmdCam.c_str());
 	strcat(cmd, UID.c_str());
 	strcat(cmd, format);
 	strcat(cmd, ".jpeg");
+
+#ifdef Retour_Moniteur
 	cout << "execute la commande: " << cmd << endl;
+#endif // Retour_Moniteur
 
 	system(cmd);
+
 }
 
 void SasDePharmacie::LectureBadge()
 {
 	pnd = nfc_open(context, NULL); //open comunication-enable poll
-	
+
 	if (pnd == NULL) {
 		printf("ERROR: %s\n", "Unable to open NFC device.");
 		exit(EXIT_FAILURE);
@@ -68,9 +71,9 @@ void SasDePharmacie::LectureBadge()
 		if (UID != print_hex(nt.nti.nai.abtUid, nt.nti.nai.szUidLen)) {
 			UID = print_hex(nt.nti.nai.abtUid, nt.nti.nai.szUidLen);
 
-#ifdef test_Porte
+#ifdef Retour_Moniteur
 			cout << "Badge lu: " << UID << endl;
-#endif // test_Porte
+#endif // Retour_Moniteur
 
 		}
 	}
@@ -78,57 +81,9 @@ void SasDePharmacie::LectureBadge()
 	nfc_close(pnd);// Close NFC device
 }
 
-void SasDePharmacie::SwitchPorte(bool Presence) //Actionne la porte corespondant a l'etat de la presence locale, C'es Le PIR qui prends le relais ensuite pour le reste de la procedure justqu'a la sortie
-{
-	if (Presence = true)
-	{
-		digitalWrite(PinPorte2, HIGH);
-		CapteurPIR();
-	}
-	if (Presence = false)
-	{
-		digitalWrite(PinPorte1, HIGH);
-		CapteurPIR();
-	}
-#ifdef test_Porte
-	while (true)
-	{
-		digitalWrite(PinPorte1, HIGH);  // Activé
-		digitalWrite(PinPorte2, HIGH);
-		delay(1000); // ms
-		digitalWrite(PinPorte2, LOW);
-		digitalWrite(PinPorte1, LOW);	  // Désactivé
-		delay(1000);
-	}
-
-#endif // Test_Porte
-}
-
-void SasDePharmacie::CapteurPIR()
-{
-#ifdef test_PIR
-
-	printf("\n");
-	printf("TEST CAPTEUR PIR:");
-	printf("\n");
-
-	while (true) {
-		if (digitalRead(PIRPin)) {
-			printf("Presence detectée! \n");
-			delay(500);
-		}
-		else {
-			delay(1000);
-			printf("Presence non detectée! \n");
-		}
-	}
-#endif // test_PIR
-	//on peut verifier la presence locale a l'aide d'UID
-} // a Faire, il faut mettre en place une procedure pour utiliser eficacement le capteur de mouvement PIR et definir l'etat de la presence locale
-
 string SasDePharmacie::print_hex(const uint8_t* pbtData, const size_t szBytes)
 {
-	short int j = 0;
+	int j = 0;
 	char buffer[1];
 	char chaine[7];
 	for (size_t i = 0; i < szBytes; i++)
@@ -143,6 +98,31 @@ string SasDePharmacie::print_hex(const uint8_t* pbtData, const size_t szBytes)
 	return chaine;
 } //returns NFC tag UID
 
+void SasDePharmacie::SetPresence(bool RP)
+{
+	presence = RP;
+}
+
+void SasDePharmacie::clear()
+{
+	UID = "";
+}
+
+string SasDePharmacie::RetBadge()
+{
+	return UID;
+}
+
+bool SasDePharmacie::CapteurPIR() //retourne si le capteur a detecté quelqu'un
+{
+	if (!digitalRead(PIRPin)) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
 bool SasDePharmacie::VerifierPresence()
 {
 	return presence;  //retourne l'etat de presence
@@ -150,39 +130,123 @@ bool SasDePharmacie::VerifierPresence()
 
 bool SasDePharmacie::VerifierAutorisation()
 {
-	//A Faire___Attend travail Antoine pour fichier XML autorisations 
-	
+	//A Faire___Attend travail Antoine pour fichier XML autorisations
+
 	return true; //retourne true pour le moment
 }
 
-void main() {
+int main() {
 
 	SasDePharmacie a;
-	a.LectureBadge();
+	digitalWrite(PinPorte1, LOW);
+	digitalWrite(PinPorte2, LOW);
+
+#ifdef tests
+	bool x = false;
 	while (true) {
-		if (a.VerifierPresence == false)
+		while (a.RetBadge() == "")
 		{
-			if (a.VerifierAutorisation == true)
+			a.LectureBadge();
+		}
+		cout << "Sorti de while test lecture badge!" << endl;
+		while (x == false)
+		{
+			a.PrisePhoto();
+			x = true;
+		}
+		cout << "Photo prise!" << endl;
+
+
+		cout << "TEST CAPTEUR PIR:" << endl;
+		while (true) {
+			if (!digitalRead(PIRPin)) {
+				cout << "Presence non detectée!" << endl;
+				delay(1000);
+			}
+			else {
+				cout << "Presence detectée!" << endl;
+				delay(1000);
+			}
+		}
+
+		exit(EXIT_SUCCESS);
+	}
+#endif // tests
+
+#ifndef tests
+	while (true)
+	{
+#ifdef Retour_Moniteur
+		cout << "Passez un badge!" << endl;
+#endif // Retour_Moniteur
+		do
+		{
+			a.LectureBadge();
+		} while (a.RetBadge() == "");
+		if (a.VerifierPresence() == false)
+		{
+			if (a.VerifierAutorisation() == true)
 			{
-				//prendre la photo
-				//actionner la porte
-				//changer l'etat de presence a true en utilisant le capteur pir //++faire une fonction qui verifie si quelqu'un a accédé au sas apres avoir badgé et desactive la porte si personne n'est rentré apres n temps
-				//une fois que la presence a été detecté ouvrir la seconde porte et verouiller la premiere
-				//et inversement si elle ne detecte rien verouille toutes les portes
+				digitalWrite(PinPorte1, HIGH);
+				int tempo = 0;
+				do
+				{
+
+#ifdef Retour_Moniteur
+					cout << "Il n'y a personne!" << endl;
+#endif // Retour_Moniteur
+
+					delay(1000);
+					tempo++;
+				} while (a.CapteurPIR() == false && tempo < 20);  //ok
+
+				if (tempo < 20) {
+
+#ifdef Retour_Moniteur
+					cout << "Quelq'un est rentre!" << endl;
+#endif // Retour_Moniteur
+
+					a.PrisePhoto();
+
+#ifdef Retour_Moniteur
+					cout << "Photo prise!" << endl;
+#endif // Retour_Moniteur
+
+					a.SetPresence(true);
+					digitalWrite(PinPorte1, LOW);
+					digitalWrite(PinPorte2, HIGH);
+				}
 			}
 			else
 			{
 				cout << "Acces non Autorise!" << endl;
 			}
-			while (a.VerifierPresence == true)
+			a.clear();
+			do
 			{
-				//Decider si on le fait par badge ou bouton
-				//tant que la personne a l'interieur n'as pas badgé ou appuye sur le bouton presence reste sur true et la porte se verouillé
-			}
+
+#ifdef Retour_Moniteur
+				if (a.VerifierPresence() == true) {
+					cout << "Dans la Pharmacie!" << endl;
+					delay(1000);
+				}
+#endif // Retour_Moniteur
+
+				digitalWrite(PinPorte1, LOW);
+				digitalWrite(PinPorte2, LOW);
+				if (a.VerifierPresence() == true) {
+					a.LectureBadge();
+					a.SetPresence(false);
+				}
+			} while (a.VerifierPresence() == true && a.RetBadge() == "");
 		}
 		else
 		{
 			cout << "Il y a deja quelq'un!" << endl;
 		}
+		a.clear();
 	}
+#endif // !tests
+
+	exit(EXIT_SUCCESS);
 }
