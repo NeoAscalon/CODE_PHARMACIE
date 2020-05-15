@@ -14,19 +14,18 @@ SasDePharmacie::SasDePharmacie()
 	nmMifare = {
 	  .nmt = NMT_ISO14443A,
 	  .nbr = NBR_106,
-	}; // Poll for a ISO14443A (MIFARE) tag
+	}; // Poll for a ISO14443A (MIFARE) tag-- on definit la norme de communication NFC
 
 	if (wiringPiSetup() == -1) {
 		printf("Setup wiringPi failed !");
 		exit(EXIT_FAILURE);
-	}
+	}	//on quite si wiringpi ne peut pas s'initialiser
 
 	pinMode(PIRPin, INPUT);
 	pinMode(PinPorte1, OUTPUT);
 	pinMode(PinPorte2, OUTPUT);
 
 	cmdCam = "sudo raspistill -vf -o /Evenements/";
-
 }
 
 SasDePharmacie::~SasDePharmacie()
@@ -50,7 +49,6 @@ void SasDePharmacie::PrisePhoto()
 #endif // Retour_Moniteur
 
 	system(cmd);
-
 }
 
 void SasDePharmacie::LectureBadge()
@@ -74,7 +72,6 @@ void SasDePharmacie::LectureBadge()
 #ifdef Retour_Moniteur
 			cout << "Badge lu: " << UID << endl;
 #endif // Retour_Moniteur
-
 		}
 	}
 
@@ -132,16 +129,15 @@ bool SasDePharmacie::VerifierAutorisation()
 {
 	//A Faire___Attend travail Antoine pour fichier XML autorisations
 
-	return true; //retourne true pour le moment
+	return true; //retourne true pour le moment mais doit retourner soit true soit false en fonction de si la personne est autorisé ou non a rentrer
 }
 
 int main() {
-
 	SasDePharmacie a;
-	digitalWrite(PinPorte1, LOW);
+	digitalWrite(PinPorte1, LOW);	//ferme les verous
 	digitalWrite(PinPorte2, LOW);
 
-#ifdef tests
+#ifdef tests		//zone de tests
 	bool x = false;
 	while (true) {
 		while (a.RetBadge() == "")
@@ -155,7 +151,6 @@ int main() {
 			x = true;
 		}
 		cout << "Photo prise!" << endl;
-
 
 		cout << "TEST CAPTEUR PIR:" << endl;
 		while (true) {
@@ -191,17 +186,15 @@ int main() {
 				int tempo = 0;
 				do
 				{
-
 #ifdef Retour_Moniteur
 					cout << "Il n'y a personne!" << endl;
 #endif // Retour_Moniteur
 
 					delay(1000);
 					tempo++;
-				} while (a.CapteurPIR() == false && tempo < 20);  //ok
+				} while (a.CapteurPIR() == false && tempo < 20);		//temporisation pour refermer la porte si personne ne rentre
 
 				if (tempo < 20) {
-
 #ifdef Retour_Moniteur
 					cout << "Quelq'un est rentre!" << endl;
 #endif // Retour_Moniteur
@@ -224,7 +217,6 @@ int main() {
 			a.clear();
 			do
 			{
-
 #ifdef Retour_Moniteur
 				if (a.VerifierPresence() == true) {
 					cout << "Dans la Pharmacie!" << endl;
@@ -237,8 +229,19 @@ int main() {
 				if (a.VerifierPresence() == true) {
 					a.LectureBadge();
 					a.SetPresence(false);
+					a.PrisePhoto();
+					digitalWrite(PinPorte2, HIGH);
 				}
 			} while (a.VerifierPresence() == true && a.RetBadge() == "");
+			while (a.CapteurPIR() == false)
+			{
+				delay(1000);
+			}
+			digitalWrite(PinPorte1, HIGH);
+			digitalWrite(PinPorte2, LOW);
+			delay(10000);
+			digitalWrite(PinPorte1, LOW);
+			digitalWrite(PinPorte2, LOW);
 		}
 		else
 		{
